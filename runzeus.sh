@@ -81,24 +81,26 @@ then
 		Zeus::ZInstall::Common::get_password:Re-enter=$ZEUS_PASS
 		zxtm!license_key=$ZEUS_LIC
 	EOF
-	/usr/local/zeus/zxtm/configure --replay-from=/usr/local/zeus/zconfig.txt --nostart
+	/usr/local/zeus/zxtm/configure --replay-from=/usr/local/zeus/zconfig.txt 
 	touch /usr/local/zeus/docker.done
 
 	# Clear the password
 	export ZEUS_PASS=""
+
+	# Ensure REST is enabled
+	echo "Enabling REST API"
+	echo "GlobalSettings.setRESTEnabled 1" | $zcli
+
+	# Disable Java Extensions if we don't have the java binary
+	echo -en "Checking for JAVA Extension Support: "
+	which $(echo "GlobalSettings.getJavaCommand" | $zcli | awk '{ print $1 }' ) || \
+			( echo "java not found" && echo "GlobalSettings.setJavaEnabled 0" | $zcli )
+
+else
+	# Start Zeus
+	/usr/local/zeus/start-zeus 
 fi
 
-# Start Zeus
-/usr/local/zeus/start-zeus 
-
-# Ensure REST is enabled
-echo "Enabling REST API"
-echo "GlobalSettings.setRESTEnabled 1" | $zcli
-
-# Disable Java Extensions if we don't have the java binary
-echo -en "Checking for JAVA Extension Support: "
-which $(echo "GlobalSettings.getJavaCommand" | $zcli | awk '{ print $1 }' ) || \
-	( echo "java not found" && echo "GlobalSettings.setJavaEnabled 0" | $zcli )
 
 # Print the password and wait for SIGTERM
 trap "echo 'Caught SIGTERM'" SIGTERM
