@@ -5,8 +5,9 @@ Brocade vTM (Formerly Riverbed SteelApp / Stingray )
 
 This is a container for the Brocade Virtual Traffic Manager. 
 
-http://www.brocade.com/en/products-services/application-delivery-controllers.html
+<http://www.brocade.com/en/products-services/application-delivery-controllers.html>
 
+<http://www.brocade.com/en/products-services/application-delivery-controllers/virtual-traffic-manager.html>
 
 This container is supplied without a license key and will run in developer mode out of the box. You can run with: 
 
@@ -38,8 +39,8 @@ Once started, point your web browser at port 9090 to access the web interface, o
 
 #
 
-Building a docker image
------------------------
+Building a docker image from github REPO
+----------------------------------------
 
     cd <docker folder>
     docker build -t <tag> .
