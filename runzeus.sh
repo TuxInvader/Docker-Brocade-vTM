@@ -51,7 +51,7 @@ if [ ! -f /usr/local/zeus/docker.done ]
 then
 
 	# Install additional packages if ZEUS_PACKAGES is set. It should be set to a list of ubuntu packages
-	if [[ -n "ZEUS_PACKAGES" ]]
+	if [[ -n "$ZEUS_PACKAGES" ]]
 	then
 		apt-get update
 		for package in $ZEUS_PACKAGES
