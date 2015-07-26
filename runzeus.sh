@@ -22,9 +22,9 @@ genPasswd() {
          pass=${pass}${chars[${rnd}]}
       done
       ZEUS_PASS=$pass
-      plog INFO "Generated Random Password for Stingray: $ZEUS_PASS"
+      plog INFO "Generated Random Password for vTM: $ZEUS_PASS"
 	else
-   	plog INFO "Using Environment Password for Stingray: $ZEUS_PASS"
+   	plog INFO "Using Environment Password for vTM: $ZEUS_PASS"
    fi
    echo "$ZEUS_PASS"
 }
