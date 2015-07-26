@@ -19,6 +19,11 @@ You must set ZEUS_EULA=accept to indicate that you accept the license agreement,
 
 If you don't specify a ZEUS_PASS or you set ZEUS_PASS=RANDOM, then a password will be randomly generated for you. The password is printed to the console after start up.
 
+You may also set a space seperated list of packages in the ZEUS_PACKAGES variable to get them installed on the first run of the container.
+This is useful if you want to enable Java Extensions. Eg:
+
+    $ docker run -e ZEUS_EULA=accept -e ZEUS_PACKAGES="openjdk-7-jre-headless" --privileged -t -d brocade-vtm
+
 #
 
 Usage with Brocade Service Director (Formerly SSC)
