@@ -2,7 +2,7 @@ FROM ubuntu-debootstrap:14.04.2
 COPY zinstall.txt /tmp/
 RUN cd /tmp/ && \
     apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl && \
-    curl -SL https://support.riverbed.com/bin/support/download?sid=6mv0npda0dlj836kdbo451gtd > installer.tgz && \
+    curl -SL https://support.riverbed.com/bin/support/download?sid=gpbcgqit0ur1m1nqh8r0qh6eeo > installer.tgz && \
     tar -zxvf installer.tgz && \
 	 /tmp/Zeus*/zinstall --replay-from=/tmp/zinstall.txt --noninteractive && \
     rm -rf /tmp/* && \
