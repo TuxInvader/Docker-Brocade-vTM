@@ -50,6 +50,22 @@ fi
 if [ ! -f /usr/local/zeus/docker.done ] 
 then
 
+	# Install additional packages if ZEUS_PACKAGES is set. It should be set to a list of ubuntu packages
+	if [[ -n "ZEUS_PACKAGES" ]]
+	then
+		apt-get update
+		for package in $ZEUS_PACKAGES
+		do
+			dpkg -l $package | egrep "^ii" > /dev/null
+			ret=$?
+			if [ $ret -ne 0 ]
+			then
+				DEBIAN_FRONTEND=noninteractive apt-get install -y $package
+			fi
+		done
+		apt-get clean
+	fi
+
 	ZEUS_PASS=$( genPasswd )
 
 	if [[ "$ZEUS_LIC" =~ http.* ]]
@@ -76,7 +92,13 @@ fi
 /usr/local/zeus/start-zeus 
 
 # Ensure REST is enabled
+echo "Enabling REST API"
 echo "GlobalSettings.setRESTEnabled 1" | $zcli
+
+# Disable Java Extensions if we don't have the java binary
+echo -en "Checking for JAVA Extension Support: "
+which $(echo "GlobalSettings.getJavaCommand" | $zcli | awk '{ print $1 }' ) || \
+	( echo "java not found" && echo "GlobalSettings.setJavaEnabled 0" | $zcli )
 
 # Print the password and wait for SIGTERM
 trap "echo 'Caught SIGTERM'" SIGTERM
