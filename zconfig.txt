@@ -1,0 +1,9 @@
+start_at_boot=n
+zxtm!cluster=C
+zxtm!group=nogroup
+zxtm!license_key=/usr/local/zeus/fla.txt
+zxtm!use_invalid_key_license=y
+zxtm!name_setname=1
+zxtm!unique_bind=N
+zxtm!user=nobody
+net!warn=
