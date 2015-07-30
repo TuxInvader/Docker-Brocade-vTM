@@ -14,6 +14,7 @@ ENV ZEUS_EULA=
 # ZEUS_LIC can be used to pass a URL from which the container will download a license file
 ENV ZEUS_LIC=
 # ZEUS_PASS can be used to set a password. By default a password will be generated for you
+# ZEUS_PASS=RANDOM: random pass, ZEUS_PASS=SIMPLE: simpler pass, or ZEUS_PASS=<your pass>
 ENV ZEUS_PASS=RANDOM
 # ZEUS_DOM can be used to set a domain and ensure the host has a FQDN.
 ENV ZEUS_DOM=

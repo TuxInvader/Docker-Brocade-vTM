@@ -18,11 +18,15 @@ You must set ZEUS_EULA=accept to indicate that you accept the license agreement,
     $ docker run -e ZEUS_EULA=accept -e ZEUS_LIC=http://10.1.1.1/fla.lic ZEUS_PASS=t3llNo0n3 --privileged -t -d brocade-vtm
 
 If you don't specify a ZEUS_PASS or you set ZEUS_PASS=RANDOM, then a password will be randomly generated for you. The password is printed to the console after start up.
+You can also set ZEUS_PASS=SIMPLE if you want to only use numbers, letters, and a few select symbols.
 
 You may also set a space seperated list of packages in the ZEUS_PACKAGES variable to get them installed on the first run of the container.
 This is useful if you want to enable Java Extensions. Eg:
 
     $ docker run -e ZEUS_EULA=accept -e ZEUS_PACKAGES="openjdk-7-jre-headless" --privileged -t -d brocade-vtm
+
+If you do not provide a license and the vTM starts up in developer mode then you will need to accept the developer mode warning on first login. 
+You may pass ZEUS_DEVMODE=yes in order to avoid seeing that warning.
 
 #
 

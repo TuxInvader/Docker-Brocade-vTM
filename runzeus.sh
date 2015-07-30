@@ -8,11 +8,19 @@ plog() {
 }
 
 genPasswd() {
-   if [ "$ZEUS_PASS" == "RANDOM" ]
+   if [ "$ZEUS_PASS" == "RANDOM" ] || [ "$ZEUS_PASS" == "SIMPLE" ]
    then
       chars=( a b c d e f g h i j k l m n o p q r s t u v w x y z 1 2 3 4 5 6 7 8 9 0 \
               A B C D E F G H I J K L M N O P Q R S T U V W X Y Z , \. \< \> \~ \# \[ \] \
-              \- \= \+ \_ \) \( \* \& \^ \% \$ \" \! \' \; \: )
+              \- \= \+ \_ \* \& \^ \% \$ \; \: \( \) )
+
+		# Simpler passwords
+		if [ "$ZEUS_PASS" == "SIMPLE" ]
+		then
+			chars=( a b c d e f g h i j k l m n o p q r s t u v w x y z 1 2 3 4 5 6 7 8 9 0 \
+					A B C D E F G H I J K L M N O P Q R S T U V W X Y Z , \. \- \+ \_ )
+		fi
+
       length=$(( 9 + $(( $RANDOM % 3 )) ))
       pass="";
 
@@ -83,6 +91,7 @@ then
 	EOF
 	/usr/local/zeus/zxtm/configure --replay-from=/usr/local/zeus/zconfig.txt 
 	touch /usr/local/zeus/docker.done
+	rm /usr/local/zeus/zconfig.txt
 
 	# Clear the password
 	export ZEUS_PASS=""
@@ -95,6 +104,12 @@ then
 	echo -en "Checking for JAVA Extension Support: "
 	which $(echo "GlobalSettings.getJavaCommand" | $zcli | awk '{ print $1 }' ) || \
 			( echo "java not found" && echo "GlobalSettings.setJavaEnabled 0" | $zcli )
+
+	if [ -n "$ZEUS_DEVMODE" ]
+	then
+		echo "Accepting developer mode"
+		echo -e "developer_mode_accepted\tyes" >> /usr/local/zeus/zxtm/global.cfg
+	fi
 
 else
 	# Start Zeus
