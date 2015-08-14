@@ -3,7 +3,7 @@ COPY zinstall.txt /tmp/
 RUN cd /tmp/ && \
     apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl && \
     echo "Downloading VTM Installer... Please wait..." && \
-    curl -sSL https://support.riverbed.com/bin/support/download?sid=6mv0npda0dlj836kdbo451gtd > installer.tgz && \
+    curl -sSL https://support.riverbed.com/bin/support/download?sid=89ckt05tr2m4htokv1sphofgt3 > installer.tgz && \
     tar -zxvf installer.tgz && \
 	 /tmp/Zeus*/zinstall --replay-from=/tmp/zinstall.txt --noninteractive && \
     rm -rf /tmp/* && \
