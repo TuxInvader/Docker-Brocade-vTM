@@ -15,7 +15,7 @@ This container is supplied without a license key and will run in developer mode 
 
 You must set *ZEUS_EULA*=accept to indicate that you accept the license agreement, otherwise the software will not start. You may also specify a License file to download over HTTP using *ZEUS_LIC*, and a password using *ZEUS_PASS*. Eg:
 
-    $ docker run -e ZEUS_EULA=accept -e ZEUS_LIC=http://10.1.1.1/fla.lic ZEUS_PASS=t3llNo0n3 --privileged -t -d brocade-vtm
+    $ docker run -e ZEUS_EULA=accept -e ZEUS_LIC=http://10.1.1.1/fla.lic -e ZEUS_PASS=t3llNo0n3 --privileged -t -d brocade-vtm
 
 If you don't specify a ZEUS_PASS or you set ZEUS_PASS=RANDOM or ZEUS_PASS=SIMPLE, then a password will be randomly generated for you. The password will be made up from alphanumerics and (,) comma, (.) period, (-) hyphen, (_) underscore, and (+) plus. The password will be printed to the console after start up.
 
