@@ -48,7 +48,7 @@ Usage with Brocade Service Director (Formerly SSC)
 
 The docker instance needs a FQDN in order for the SSC to license it. You can either provide the container a fully qualified name at launch using -h, or you can specify the domain in an environment variable called ZEUS_DOM. 
 
-    $ docker run -e ZEUS_EULA=accept -e ZEUS_LIC=http://10.1.1.1/fla.lic ZEUS_PASS=t3llNo0n3 -e ZEUS_DOM=demo.local --privileged -t -d brocade-vtm
+    $ docker run -e ZEUS_EULA=accept -e ZEUS_LIC=http://10.1.1.1/fla.lic -e ZEUS_PASS=t3llNo0n3 -e ZEUS_DOM=demo.local --privileged -t -d brocade-vtm
 
 #
 
