@@ -3,7 +3,7 @@ COPY zinstall.txt /tmp/
 RUN cd /tmp/ && \
     apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl && \
     echo "Downloading VTM Installer... Please wait..." && \
-    curl -sSL http://www.badpenguin.co.uk/vadc/ZeusTM_102r1_Linux-x86_64.tgz > installer.tgz && \
+    curl -sSL http://www.badpenguin.co.uk/vadc/ZeusTM_103_Linux-x86_64.tgz > installer.tgz && \
     tar -zxvf installer.tgz && \
 	 /tmp/Zeus*/zinstall --replay-from=/tmp/zinstall.txt --noninteractive && \
     rm -rf /tmp/* && \
