@@ -23,4 +23,4 @@ ENV ZEUS_DOM=
 # If you need Java Extensions.... Eg ZEUS_PACKAGES="openjdk-7-jre-headless"
 ENV ZEUS_PACKAGES=
 CMD [ "/usr/local/zeus/runzeus.sh" ]
-EXPOSE 9070 9080 9090 80 443
+EXPOSE 9070 9080 9090 9090/udp 80 443
