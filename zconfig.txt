@@ -7,3 +7,4 @@ zxtm!name_setname=1
 zxtm!unique_bind=N
 zxtm!user=nobody
 net!warn=
+selfreg!register=n
