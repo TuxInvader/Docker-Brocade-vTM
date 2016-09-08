@@ -91,6 +91,19 @@ then
 		Zeus::ZInstall::Common::get_password:Re-enter=$ZEUS_PASS
 		zxtm!license_key=$ZEUS_LIC
 	EOF
+
+	if [ -n "$ZEUS_CLUSTER_NAME" ]; then
+		sed -i 's/zxtm!cluster=C/zxtm!cluster=S/' /usr/local/zeus/zconfig.txt
+		cat <<-EOF >> /usr/local/zeus/zconfig.txt
+			zlb!admin_hostname=$ZEUS_CLUSTER_NAME
+			zlb!admin_password=$ZEUS_PASS
+			zlb!admin_port=9090
+			zlb!admin_username=admin
+			zxtm!clustertipjoin=p
+			zxtm!fingerprints_ok=Y
+		EOF
+	fi
+
 	/usr/local/zeus/zxtm/configure --replay-from=/usr/local/zeus/zconfig.txt 
 	touch /usr/local/zeus/docker.done
 	rm /usr/local/zeus/zconfig.txt
