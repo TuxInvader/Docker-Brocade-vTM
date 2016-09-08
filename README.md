@@ -40,6 +40,9 @@ This is useful if you want to enable Java Extensions. Eg:
 If you do not provide a license and the vTM starts up in developer mode then you will need to accept the developer mode warning on first login. 
 You may pass ZEUS_DEVMODE=yes in order to avoid seeing that warning.
 
+*ZEUS_CLUSTER_NAME*
+
+If you want this vtm to join an existing cluster, simply provide the DNS name of one of the cluster member through this environment variable.
 
 #
 
