@@ -5,7 +5,7 @@ RUN cd /tmp/ && \
     echo "Downloading VTM Installer... Please wait..." && \
     curl -sSL http://www.badpenguin.co.uk/vadc/ZeusTM_104_Linux-x86_64.tgz > installer.tgz && \
     tar -zxvf installer.tgz && \
-	 /tmp/Zeus*/zinstall --replay-from=/tmp/zinstall.txt --noninteractive && \
+    /tmp/Zeus*/zinstall --replay-from=/tmp/zinstall.txt --noninteractive && \
     rm -rf /tmp/* && \
     apt-get clean
 COPY zconfig.txt runzeus.sh /usr/local/zeus/
@@ -22,5 +22,10 @@ ENV ZEUS_DOM=
 # ZEUS_PACKAGES can be used to install additional packages on first run. 
 # If you need Java Extensions.... Eg ZEUS_PACKAGES="openjdk-7-jre-headless"
 ENV ZEUS_PACKAGES=
+# ZEUS_DEVMODE can be used to force the vtm to start up in limited development mode
+ENV ZEUS_DEVMODE=
+# ZEUS_CLUSTER_NAME is used to set the DNS name of an existing member of an existing cluster
+# we wish to get this new vtm integrated into.
+ENV ZEUS_CLUSTER_NAME=
 CMD [ "/usr/local/zeus/runzeus.sh" ]
 EXPOSE 9070 9080 9090 9090/udp 80 443
