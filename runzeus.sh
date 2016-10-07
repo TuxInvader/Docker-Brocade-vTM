@@ -93,6 +93,10 @@ then
 	EOF
 
 	if [ -n "$ZEUS_CLUSTER_NAME" ]; then
+		while [ -n "$(curl -k -s -S -o/dev/null https://$ZEUS_CLUSTER_NAME:9090)" ];
+		do
+			sleep 1
+		done
 		sed -i 's/zxtm!cluster=C/zxtm!cluster=S/' /usr/local/zeus/zconfig.txt
 		cat <<-EOF >> /usr/local/zeus/zconfig.txt
 			zlb!admin_hostname=$ZEUS_CLUSTER_NAME
@@ -104,7 +108,13 @@ then
 		EOF
 	fi
 
-	/usr/local/zeus/zxtm/configure --replay-from=/usr/local/zeus/zconfig.txt 
+	/usr/local/zeus/zxtm/configure --noninteractive --noloop --replay-from=/usr/local/zeus/zconfig.txt
+	while [ $? -ne 0 ];
+	do
+		sleep 1
+		/usr/local/zeus/zxtm/configure --noninteractive --noloop --replay-from=/usr/local/zeus/zconfig.txt
+	done
+
 	touch /usr/local/zeus/docker.done
 	rm /usr/local/zeus/zconfig.txt
 
