@@ -80,7 +80,9 @@ then
 
 	if [[ "$ZEUS_LIC" =~ http.* ]]
 	then
-		/usr/local/zeus/admin/bin/httpclient $ZEUS_LIC > /tmp/fla.lic
+		ZEUS_LIC_URL=$ZEUS_LIC
+		echo "Downloading license key"
+		curl --silent $ZEUS_LIC -o /tmp/fla.lic
 		ZEUS_LIC=/tmp/fla.lic
 	fi
 
@@ -111,6 +113,13 @@ then
 	until /usr/local/zeus/zxtm/configure --noninteractive --noloop --replay-from=/usr/local/zeus/zconfig.txt
 	do
 		sleep 1
+		# this might be due to a missing license.
+		# let's try to re-download if provided over HTTP.
+		if [[ "$ZEUS_LIC_URL" =~ http.* ]]
+		then
+			echo "Downloading license key"
+			curl --silent $ZEUS_LIC_URL -o /tmp/fla.lic
+		fi
 	done
 
 	touch /usr/local/zeus/docker.done
