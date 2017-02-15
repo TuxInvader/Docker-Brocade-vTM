@@ -1,7 +1,7 @@
 FROM ubuntu-debootstrap:14.04.2
 COPY zinstall.txt /tmp/
 RUN cd /tmp/ && \
-    apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl iproute2 iptables libxtables10 && \
+    apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y dnsutils curl iproute2 iptables libxtables10 && \
     echo "Downloading VTM Installer... Please wait..." && \
     curl -sSL http://www.badpenguin.co.uk/vadc/ZeusTM_111_Linux-x86_64.tgz > installer.tgz && \
     tar -zxvf installer.tgz && \
