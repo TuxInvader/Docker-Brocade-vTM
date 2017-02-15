@@ -108,11 +108,9 @@ then
 		EOF
 	fi
 
-	/usr/local/zeus/zxtm/configure --noninteractive --noloop --replay-from=/usr/local/zeus/zconfig.txt
-	while [ $? -ne 0 ];
+	until /usr/local/zeus/zxtm/configure --noninteractive --noloop --replay-from=/usr/local/zeus/zconfig.txt
 	do
 		sleep 1
-		/usr/local/zeus/zxtm/configure --noninteractive --noloop --replay-from=/usr/local/zeus/zconfig.txt
 	done
 
 	touch /usr/local/zeus/docker.done
