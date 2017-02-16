@@ -3,7 +3,7 @@ COPY zinstall.txt /tmp/
 RUN cd /tmp/ && \
     apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y dnsutils curl iproute2 iptables libxtables10 && \
     echo "Downloading VTM Installer... Please wait..." && \
-    curl -sSL http://www.badpenguin.co.uk/vadc/ZeusTM_171_Linux-x86_64.tgz > installer.tgz && \
+    curl -sSL http://www.badpenguin.co.uk/vadc/ZeusTM_111_Linux-x86_64.tgz > installer.tgz && \
     tar -zxvf installer.tgz && \
     /tmp/Zeus*/zinstall --replay-from=/tmp/zinstall.txt --noninteractive && \
     rm -rf /tmp/* && \
