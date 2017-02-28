@@ -1,17 +1,17 @@
 FROM ubuntu-debootstrap:14.04.2
 COPY zinstall.txt /tmp/
 ENV ZEUSFILE=ZeusTM_171_Linux-x86_64.tgz
-#COPY $ZEUSFILE /tmp/installer.tgz
-RUN cd /tmp/ && \
-    apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y dnsutils curl iproute2 iptables libxtables10 && \
-    if [ ! -f /tmp/installer.tgz ]; then \
+COPY $ZEUSFILE /tmp/installer.tgz
+RUN cd /tmp/ \
+&&  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y dnsutils curl iproute2 iptables libxtables10 \
+&&  if [ ! -f /tmp/installer.tgz ]; then \
     echo "Downloading VTM Installer... Please wait..." ; \
     curl -sSL http://www.badpenguin.co.uk/vadc/$ZEUSFILE > installer.tgz ; \
-    fi && \
-    tar -zxvf installer.tgz && \
-    /tmp/Zeus*/zinstall --replay-from=/tmp/zinstall.txt --noninteractive && \
-    rm -rf /tmp/* && \
-    apt-get clean
+    fi \
+&&  tar -zxvf installer.tgz \
+&&  /tmp/Zeus*/zinstall --replay-from=/tmp/zinstall.txt --noninteractive \
+&&  rm -rf /tmp/* \
+&&  apt-get clean
 COPY zconfig.txt runzeus.sh /usr/local/zeus/
 # ZEUS_EULA must be set to "accept" otherwise the container will do nothing
 ENV ZEUS_EULA=
