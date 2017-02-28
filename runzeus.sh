@@ -5,7 +5,7 @@ zhttp="/usr/local/zeus/admin/bin/httpclient"
 provisionLog="/var/log/provision.log"
 
 plog() {
-   echo "$1: $2" | tee -a $provisionLog
+   echo "$1: $2" >> $provisionLog
 }
 
 genPasswd() {
@@ -34,9 +34,10 @@ genPasswd() {
       done
       ZEUS_PASS=$pass
       plog INFO "Generated Random Password for vTM: $ZEUS_PASS"
-	else
-   	plog INFO "Using Environment Password for vTM: $ZEUS_PASS"
+   else
+      plog INFO "Using Environment Password for vTM: $ZEUS_PASS"
    fi
+   echo "$ZEUS_PASS"
 }
 
 plog INFO "Container Started"
@@ -129,8 +130,8 @@ then
 				selfreg!message=${ZEUS_REGISTER_MSG}
 				selfreg!policy_id=${ZEUS_REGISTER_POLICY}
 				selfreg!owner=${ZEUS_REGISTER_OWNER}
-				selfreg!owner_secret=${ZEUS_REGISTER_OWNER_SECRET}
-				Zeus::ZInstall::Common::get_password:Enter the secret associated with the chosen Owner=${ZEUS_REGISTER_OWNER_SECRET}
+				selfreg!owner_secret=${ZEUS_REGISTER_SECRET}
+				Zeus::ZInstall::Common::get_password:Enter the secret associated with the chosen Owner=${ZEUS_REGISTER_SECRET}
 			EOF
         else
    	        plog ERROR  "Service Director Registration Skipped! Fingerprint does not match"
@@ -149,38 +150,6 @@ then
 			curl --silent $ZEUS_LIC_URL -o /tmp/fla.lic
 		fi
 	done
-
-#   # Setup the configuration for self registration with SD
-#    if [ -n "$ZEUS_REGISTER_HOST" ] && [ -n "$ZEUS_REGISTER_CERT" ]; then
-#        sconf="/usr/local/zeus/zxtm/conf/settings.cfg"
-#        gconf="/usr/local/zeus/zxtm/global.cfg"
-#        cert=$(echo "$ZEUS_REGISTER_CERT" | sed -re '{s/-.*?-//};:a;N;$!ba;s/\n//g;{s/-.*?-//}')
-#        echo -e "remote_licensing!registration_server\t${ZEUS_REGISTER_HOST}" >> $sconf
-#        echo -e "remote_licensing!server_certificate\t${cert}" >> $sconf
-#
-#        if [ -n "$ZEUS_REGISTER_EMAIL" ] ; then
-#            echo -e "remote_licensing!email_address\t${ZEUS_REGISTER_EMAIL}" >> $gconf
-#        fi
-#
-#        if [ -n "$ZEUS_REGISTER_MSG" ] ; then
-#            echo -e "remote_licensing!message\t${ZEUS_REGISTER_MSG}" >> $gconf
-#        fi
-#
-#        if [ -n "$ZEUS_REGISTER_POLICY" ] ; then
-#            echo -e "remote_licensing!policy_id\t${ZEUS_REGISTER_POLICY}" >> $sconf
-#            if [ -n "$ZEUS_REGISTER_OWNER" ] ; then
-#                echo -e "remote_licensing!owner\t${ZEUS_REGISTER_OWNER}" >> $sconf
-#                if -n [ "$ZEUS_REGISTER_OWNER_SECRET" ] ; then
-#                    echo -e "remote_licensing!owner_secret\t${ZEUS_REGISTER_OWNER_SECRET}" >> $sconf
-#                fi
-#            fi
-#        fi
-#
-#        # Register ourselves
-#        if [ -x "/usr/local/zeus/zxtm/bin/self-register" ] ; then
-#            /usr/local/zeus/zxtm/bin/self-register
-#        fi
-#    fi
 
 	touch /usr/local/zeus/docker.done
 	rm /usr/local/zeus/zconfig.txt

@@ -49,6 +49,38 @@ If you want this vtm to join an existing cluster, simply provide the DNS name of
 Usage with Brocade Service Director (Formerly SSC)
 ----------------------------------------------------------------------
 
+## Self Registration
+Since vTM 10.4 and Service Director 2.4.0 is has been possible for vTMs to AutoRegister themselves with the Services Director. 
+
+In order for vTM to register itself with a Services Director, you can provide the following additional environment parameters to the container:
+
+*ZEUS_REGISTER_HOST*
+The Host/IP and Port of your Services Directors REST API. Eg: sd.mycompany.com:8100
+
+*ZEUS_REGISTER_FP*
+The SHA-1 fingerprint of the Service Directors REST API
+
+You can also optionally provide an email (*ZEUS_REGISTER_EMAIL*) and message (*ZEUS_REGISTER_MSG*)
+
+## Auto Approval
+Since 17.1(?) and BSD 2.6 you can have the licenses auto-accepted according to a policy. To do so provide the additional parameters:
+
+*ZEUS_REGISTER_POLICY*
+The policy_id of the auto-approval policy to use for this vTM
+
+*ZEUS_REGISTER_OWNER*
+The name of the Owner for this vTM
+
+*ZEUS_REGISTER_SECRET*
+If the Owner has a secret, then you need to provide that secret here.
+
+Example:
+
+    $ docker run -e ZEUS_EULA=accept -e ZEUS_REGISTER_HOST=sd1:8100 -e ZEUS_REGISTER_FP="A0:A1:A2:A3:A4:A5:A6:A7:A8:A9:B1:B2:B3:B4:B5:B6:B7:B8:B9:B0" -e ZEUS_REGISTER_EMAIL=me@somewhere.com -e ZEUS_REGISTER_MSG="Hell Yeah" -e ZEUS_REGISTER_OWNER=Mark -e ZEUS_REGISTER_OWNER_SECRET=qwerty1 -e ZEUS_REGISTER_POLICY=Policy-9999-9999-9999-9999 --privileged -t -d tuxinvader/brocade-vtm
+
+Legacy Usage with Brocade Service Director (Formerly SSC)
+----------------------------------------------------------------------
+
 The docker instance needs a FQDN in order for the SSC to license it. You can either provide the container a fully qualified name at launch using -h, or you can specify the domain in an environment variable called ZEUS_DOM. 
 
     $ docker run -e ZEUS_EULA=accept -e ZEUS_LIC=http://10.1.1.1/fla.lic -e ZEUS_PASS=t3llNo0n3 -e ZEUS_DOM=demo.local --privileged -t -d tuxinvader/brocade-vtm
