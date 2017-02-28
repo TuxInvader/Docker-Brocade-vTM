@@ -1,10 +1,11 @@
 #!/bin/bash
 
 zcli="/usr/local/zeus/zxtm/bin/zcli --formatoutput"
+zhttp="/usr/local/zeus/admin/bin/httpclient"
 provisionLog="/var/log/provision.log"
 
 plog() {
-   echo "$1: $2" >> $provisionLog
+   echo "$1: $2" | tee -a $provisionLog
 }
 
 genPasswd() {
@@ -36,10 +37,9 @@ genPasswd() {
 	else
    	plog INFO "Using Environment Password for vTM: $ZEUS_PASS"
    fi
-   echo "$ZEUS_PASS"
 }
 
-echo "Container Started"
+plog INFO "Container Started"
 
 # update the hostname if we were given a ZEUS_DOM
 if [[ -n "$ZEUS_DOM" ]]
@@ -60,9 +60,11 @@ fi
 if [ ! -f /usr/local/zeus/docker.done ] 
 then
 
+    plog INFO "Container First Run: STARTING"
 	# Install additional packages if ZEUS_PACKAGES is set. It should be set to a list of ubuntu packages
 	if [[ -n "$ZEUS_PACKAGES" ]]
 	then
+        plog INFO "Installing Packages: $ZEUS_PACKAGES"
 		apt-get update
 		for package in $ZEUS_PACKAGES
 		do
@@ -81,7 +83,7 @@ then
 	if [[ "$ZEUS_LIC" =~ http.* ]]
 	then
 		ZEUS_LIC_URL=$ZEUS_LIC
-		echo "Downloading license key"
+		plog INFO "Downloading license key"
 		curl --silent $ZEUS_LIC -o /tmp/fla.lic
 		ZEUS_LIC=/tmp/fla.lic
 	fi
@@ -95,6 +97,7 @@ then
 	EOF
 
 	if [ -n "$ZEUS_CLUSTER_NAME" ]; then
+		plog INFO "Joining Cluster: $ZEUS_CLUSTER_NAME"
 		while [ -n "$(curl -k -s -S -o/dev/null https://$ZEUS_CLUSTER_NAME:9090)" ];
 		do
 			sleep 1
@@ -110,6 +113,31 @@ then
 		EOF
 	fi
 
+    # Setup the configuration for self registration with SD
+    if [ -n "$ZEUS_REGISTER_HOST" ] && [ -n "$ZEUS_REGISTER_FP" ]; then
+        hostport=($( echo "${ZEUS_REGISTER_HOST}" | sed -re 's/:/ /' ))
+        $zhttp --fingerprint="${ZEUS_REGISTER_FP}"  --verify \
+               --no-verify-host "https://${ZEUS_REGISTER_HOST}" > /dev/null
+        if [ $? == 0 ]; then
+   	        plog INFO  "Service Director Registration OK! Cert Check Passed"
+			cat <<-EOF >> /usr/local/zeus/zconfig.txt
+				selfreg!register=y
+				selfreg!address=${hostport[0]}
+				selfreg!port=${hostport[1]}
+				selfreg!fingerprint_ok=y
+				selfreg!email_addr=${ZEUS_REGISTER_EMAIL}
+				selfreg!message=${ZEUS_REGISTER_MSG}
+				selfreg!policy_id=${ZEUS_REGISTER_POLICY}
+				selfreg!owner=${ZEUS_REGISTER_OWNER}
+				selfreg!owner_secret=${ZEUS_REGISTER_OWNER_SECRET}
+				Zeus::ZInstall::Common::get_password:Enter the secret associated with the chosen Owner=${ZEUS_REGISTER_OWNER_SECRET}
+			EOF
+        else
+   	        plog ERROR  "Service Director Registration Skipped! Fingerprint does not match"
+        fi
+    fi
+
+    plog INFO "Configuring vTM"
 	until /usr/local/zeus/zxtm/configure --noninteractive --noloop --replay-from=/usr/local/zeus/zconfig.txt
 	do
 		sleep 1
@@ -117,43 +145,42 @@ then
 		# let's try to re-download if provided over HTTP.
 		if [[ "$ZEUS_LIC_URL" =~ http.* ]]
 		then
-			echo "Downloading license key"
+			plog WARN "Retrying Download license key"
 			curl --silent $ZEUS_LIC_URL -o /tmp/fla.lic
 		fi
 	done
 
-    # Setup the configuration for self registration with SD
-    if [ -n "$ZEUS_REGISTER_HOST" ] && [ -n "$ZEUS_REGISTER_CERT" ]; then
-        sconf="/usr/local/zeus/zxtm/conf/settings.cfg"
-        gconf="/usr/local/zeus/zxtm/global.cfg"
-        cert=$(echo "$ZEUS_REGISTER_CERT" | sed -re '{s/-.*?-//};:a;N;$!ba;s/\n//g;{s/-.*?-//}')
-        echo -e "remote_licensing!registration_server\t${ZEUS_REGISTER_HOST}" >> $sconf
-        echo -e "remote_licensing!server_certificate\t${cert}" >> $sconf
-        /usr/local/zeus/zxtm/bin/replicate_config
-
-        if [ -n "$ZEUS_REGISTER_EMAIL" ] ; then
-            echo -e "remote_licensing!email_address\t${ZEUS_REGISTER_EMAIL}" >> $gconf
-        fi
-
-        if [ -n "$ZEUS_REGISTER_MSG" ] ; then
-            echo -e "remote_licensing!message\t${ZEUS_REGISTER_MSG}" >> $gconf
-        fi
-
-        if [ -n "$ZEUS_REGISTER_POLICY" ] ; then
-            echo -e "remote_licensing!policy_id\t${ZEUS_REGISTER_POLICY}" >> $sconf
-            if -n [ "$ZEUS_REGISTER_OWNER" ] ; then
-                echo -e "remote_licensing!owner\t${ZEUS_REGISTER_OWNER}" >> $sconf
-                if -n [ "$ZEUS_REGISTER_OWNER" ] ; then
-                    echo -e "remote_licensing!owner_secret\t${ZEUS_REGISTER_OWNER_SECRET}" >> $sconf
-                fi
-            fi
-        fi
-
-        # Register ourselves
-        if [ -x "/usr/local/zeus/zxtm/bin/self-register" ] ; then
-            /usr/local/zeus/zxtm/bin/self-register
-        fi
-    fi
+#   # Setup the configuration for self registration with SD
+#    if [ -n "$ZEUS_REGISTER_HOST" ] && [ -n "$ZEUS_REGISTER_CERT" ]; then
+#        sconf="/usr/local/zeus/zxtm/conf/settings.cfg"
+#        gconf="/usr/local/zeus/zxtm/global.cfg"
+#        cert=$(echo "$ZEUS_REGISTER_CERT" | sed -re '{s/-.*?-//};:a;N;$!ba;s/\n//g;{s/-.*?-//}')
+#        echo -e "remote_licensing!registration_server\t${ZEUS_REGISTER_HOST}" >> $sconf
+#        echo -e "remote_licensing!server_certificate\t${cert}" >> $sconf
+#
+#        if [ -n "$ZEUS_REGISTER_EMAIL" ] ; then
+#            echo -e "remote_licensing!email_address\t${ZEUS_REGISTER_EMAIL}" >> $gconf
+#        fi
+#
+#        if [ -n "$ZEUS_REGISTER_MSG" ] ; then
+#            echo -e "remote_licensing!message\t${ZEUS_REGISTER_MSG}" >> $gconf
+#        fi
+#
+#        if [ -n "$ZEUS_REGISTER_POLICY" ] ; then
+#            echo -e "remote_licensing!policy_id\t${ZEUS_REGISTER_POLICY}" >> $sconf
+#            if [ -n "$ZEUS_REGISTER_OWNER" ] ; then
+#                echo -e "remote_licensing!owner\t${ZEUS_REGISTER_OWNER}" >> $sconf
+#                if -n [ "$ZEUS_REGISTER_OWNER_SECRET" ] ; then
+#                    echo -e "remote_licensing!owner_secret\t${ZEUS_REGISTER_OWNER_SECRET}" >> $sconf
+#                fi
+#            fi
+#        fi
+#
+#        # Register ourselves
+#        if [ -x "/usr/local/zeus/zxtm/bin/self-register" ] ; then
+#            /usr/local/zeus/zxtm/bin/self-register
+#        fi
+#    fi
 
 	touch /usr/local/zeus/docker.done
 	rm /usr/local/zeus/zconfig.txt
@@ -162,7 +189,7 @@ then
 	export ZEUS_PASS=""
 
 	# Ensure REST is enabled
-	echo "Enabling REST API"
+	plog INFO "Enabling REST API"
 	echo "GlobalSettings.setRESTEnabled 1" | $zcli
 
 	# Disable Java Extensions if we don't have the java binary
@@ -172,9 +199,11 @@ then
 
 	if [ -n "$ZEUS_DEVMODE" ]
 	then
-		echo "Accepting developer mode"
+		plog INFO "Accepting developer mode"
 		echo -e "developer_mode_accepted\tyes" >> /usr/local/zeus/zxtm/global.cfg
 	fi
+
+    plog INFO "Container First Run COMPLETE"
 
 else
 	# Start Zeus
