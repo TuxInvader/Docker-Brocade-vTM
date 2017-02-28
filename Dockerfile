@@ -1,14 +1,14 @@
 FROM ubuntu-debootstrap:14.04.2
 COPY zinstall.txt /tmp/
-ENV ZEUSFILE=ZeusTM_171_Linux-x86_64.tgz
-COPY $ZEUSFILE /tmp/installer.tgz
+ENV ZEUSFILE ZeusTM_171_Linux-x86_64.tgz
+COPY installer/ /tmp/
 RUN cd /tmp/ \
 &&  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y dnsutils curl iproute2 iptables libxtables10 \
-&&  if [ ! -f /tmp/installer.tgz ]; then \
+&&  if [ ! -f /tmp/$ZEUSFILE ]; then \
     echo "Downloading VTM Installer... Please wait..." ; \
-    curl -sSL http://www.badpenguin.co.uk/vadc/$ZEUSFILE > installer.tgz ; \
+    curl -sSL http://www.badpenguin.co.uk/vadc/$ZEUSFILE > $ZEUSFILE ; \
     fi \
-&&  tar -zxvf installer.tgz \
+&&  tar -zxvf $ZEUSFILE \
 &&  /tmp/Zeus*/zinstall --replay-from=/tmp/zinstall.txt --noninteractive \
 &&  rm -rf /tmp/* \
 &&  apt-get clean
@@ -31,5 +31,11 @@ ENV ZEUS_DEVMODE=
 # ZEUS_CLUSTER_NAME is used to set the DNS name of an existing member of an existing cluster
 # we wish to get this new vtm integrated into.
 ENV ZEUS_CLUSTER_NAME=
+# ZEUS Service Director Registratrions
+ENV ZEUS_REGISTER_HOST=
+ENV ZEUS_REGISTER_FP=
+ENV ZEUS_REGISTER_POLICY=
+ENV ZEUS_REGISTER_OWNER=
+ENV ZEUS_REGISTER_SECRET=
 CMD [ "/usr/local/zeus/runzeus.sh" ]
 EXPOSE 9070 9080 9090 9090/udp 80 443
