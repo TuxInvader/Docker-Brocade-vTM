@@ -1,6 +1,6 @@
 FROM ubuntu-debootstrap:14.04.2
 COPY zinstall.txt /tmp/
-ENV ZEUSFILE ZeusTM_171_Linux-x86_64.tgz
+ENV ZEUSFILE=ZeusTM_171_Linux-x86_64.tgz
 COPY installer/ /tmp/
 RUN cd /tmp/ \
 &&  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y dnsutils curl iproute2 iptables libxtables10 \
