@@ -1,5 +1,4 @@
 #!/bin/bash
-set -x
 
 zcli="/usr/local/zeus/zxtm/bin/zcli --formatoutput"
 provisionLog="/var/log/provision.log"
@@ -126,7 +125,7 @@ then
     # Setup the configuration for self registration with SD
     if [ -n "$ZEUS_REGISTER_HOST" ] && [ -n "$ZEUS_REGISTER_CERT" ]; then
         sconf="/usr/local/zeus/zxtm/conf/settings.cfg"
-        gconf="/usr/local/zeus/global.cfg"
+        gconf="/usr/local/zeus/zxtm/global.cfg"
         cert=$(echo "$ZEUS_REGISTER_CERT" | sed -re '{s/-.*?-//};:a;N;$!ba;s/\n//g;{s/-.*?-//}')
         echo -e "remote_licensing!registration_server\t${ZEUS_REGISTER_HOST}" >> $sconf
         echo -e "remote_licensing!server_certificate\t${cert}" >> $sconf
