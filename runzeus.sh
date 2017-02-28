@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 
 zcli="/usr/local/zeus/zxtm/bin/zcli --formatoutput"
 provisionLog="/var/log/provision.log"
@@ -121,6 +122,39 @@ then
 			curl --silent $ZEUS_LIC_URL -o /tmp/fla.lic
 		fi
 	done
+
+    # Setup the configuration for self registration with SD
+    if [ -n "$ZEUS_REGISTER_HOST" ] && [ -n "$ZEUS_REGISTER_CERT" ]; then
+        sconf="/usr/local/zeus/zxtm/conf/settings.cfg"
+        gconf="/usr/local/zeus/global.cfg"
+        cert=$(echo "$ZEUS_REGISTER_CERT" | sed -re '{s/-.*?-//};:a;N;$!ba;s/\n//g;{s/-.*?-//}')
+        echo -e "remote_licensing!registration_server\t${ZEUS_REGISTER_HOST}" >> $sconf
+        echo -e "remote_licensing!server_certificate\t${cert}" >> $sconf
+        /usr/local/zeus/zxtm/bin/replicate_config
+
+        if [ -n "$ZEUS_REGISTER_EMAIL" ] ; then
+            echo -e "remote_licensing!email_address\t${ZEUS_REGISTER_EMAIL}" >> $gconf
+        fi
+
+        if [ -n "$ZEUS_REGISTER_MSG" ] ; then
+            echo -e "remote_licensing!message\t${ZEUS_REGISTER_MSG}" >> $gconf
+        fi
+
+        if [ -n "$ZEUS_REGISTER_POLICY" ] ; then
+            echo -e "remote_licensing!policy_id\t${ZEUS_REGISTER_POLICY}" >> $sconf
+            if -n [ "$ZEUS_REGISTER_OWNER" ] ; then
+                echo -e "remote_licensing!owner\t${ZEUS_REGISTER_OWNER}" >> $sconf
+                if -n [ "$ZEUS_REGISTER_OWNER" ] ; then
+                    echo -e "remote_licensing!owner_secret\t${ZEUS_REGISTER_OWNER_SECRET}" >> $sconf
+                fi
+            fi
+        fi
+
+        # Register ourselves
+        if [ -x "/usr/local/zeus/zxtm/bin/self-register" ] ; then
+            /usr/local/zeus/zxtm/bin/self-register
+        fi
+    fi
 
 	touch /usr/local/zeus/docker.done
 	rm /usr/local/zeus/zconfig.txt
