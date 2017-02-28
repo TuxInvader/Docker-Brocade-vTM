@@ -21,6 +21,10 @@ If you don't specify a ZEUS_PASS or you set ZEUS_PASS=RANDOM or ZEUS_PASS=SIMPLE
 
 You can also set ZEUS_PASS=STRONG if you want to generate a stronger password making use of more symbols.
 
+Install from local tarball
+---------------------------
+By default the Dockerfile will download the installer from the internet, if you want to use a local tarball, then drop it in the "installer" folder and change the ZEUSFILE variable to match the filename.
+
 Additional Environment Variables
 --------------------------------
 
@@ -55,9 +59,11 @@ Since vTM 10.4 and Service Director 2.4.0 is has been possible for vTMs to AutoR
 In order for vTM to register itself with a Services Director, you can provide the following additional environment parameters to the container:
 
 *ZEUS_REGISTER_HOST*
+
 The Host/IP and Port of your Services Directors REST API. Eg: sd.mycompany.com:8100
 
 *ZEUS_REGISTER_FP*
+
 The SHA-1 fingerprint of the Service Directors REST API
 
 You can also optionally provide an email (*ZEUS_REGISTER_EMAIL*) and message (*ZEUS_REGISTER_MSG*)
@@ -66,12 +72,15 @@ You can also optionally provide an email (*ZEUS_REGISTER_EMAIL*) and message (*Z
 Since 17.1(?) and BSD 2.6 you can have the licenses auto-accepted according to a policy. To do so provide the additional parameters:
 
 *ZEUS_REGISTER_POLICY*
+
 The policy_id of the auto-approval policy to use for this vTM
 
 *ZEUS_REGISTER_OWNER*
+
 The name of the Owner for this vTM
 
 *ZEUS_REGISTER_SECRET*
+
 If the Owner has a secret, then you need to provide that secret here.
 
 Example:
