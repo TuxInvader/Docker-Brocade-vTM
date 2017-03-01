@@ -68,7 +68,7 @@ The Host/IP and Port of your Services Directors REST API. Eg: sd.mycompany.com:8
 
 *ZEUS_REGISTER_FP*
 
-The SHA-1 fingerprint of the Service Directors REST API
+If you want this vTM to verify the SHA-1 fingerprint of the Service Director it is registering with, then provide the 20 byte hex encoded, colon separated hash here. eg: aa:bb:cc:dd:ee:ff:11:22:33:44:55:66:77:88:99:00:aa:bb:cc:dd
 
 You can also optionally provide an email (*ZEUS_REGISTER_EMAIL*) and message (*ZEUS_REGISTER_MSG*)
 

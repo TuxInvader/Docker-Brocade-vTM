@@ -109,6 +109,8 @@ then
 				--no-verify-host "https://${ZEUS_CLUSTER_NAME}:9090" > /dev/null
 			if [ $? == 0 ]; then
 				join=y
+			else
+				plog ERROR  "Clustering Skipped! Fingerprint does not match"
 			fi
 		else
 			join=y
@@ -133,12 +135,23 @@ then
 	fi
 
 	# Setup the configuration for self registration with SD
-	if [ -n "$ZEUS_REGISTER_HOST" ] && [ -n "$ZEUS_REGISTER_FP" ]; then
+	if [ -n "$ZEUS_REGISTER_HOST" ]; then
+		register=n
 		hostport=($( echo "${ZEUS_REGISTER_HOST}" | sed -re 's/:/ /' ))
-		$zhttp --fingerprint="${ZEUS_REGISTER_FP}"  --verify \
+		if [ -n "$ZEUS_REGISTER_FP" ]; then
+			plog INFO "Checking BSD Fingerprint: $ZEUS_REGISTER_FP"
+			$zhttp --fingerprint="${ZEUS_REGISTER_FP}"  --verify \
 			   --no-verify-host "https://${ZEUS_REGISTER_HOST}" > /dev/null
-		if [ $? == 0 ]; then
-			plog INFO  "Service Director Registration OK! Cert Check Passed"
+			if [ $? == 0 ]; then
+				register=y
+			else
+				plog ERROR  "Service Director Registration Skipped! Fingerprint does not match"
+			fi
+		else
+			register=y
+		fi
+		if [ "$register" == "y" ]; then
+			plog INFO  "Configuring Service Director Registration"
 			cat <<-EOF >> /usr/local/zeus/zconfig.txt
 				selfreg!register=y
 				selfreg!address=${hostport[0]}
@@ -151,8 +164,6 @@ then
 				selfreg!owner_secret=${ZEUS_REGISTER_SECRET}
 				Zeus::ZInstall::Common::get_password:Enter the secret associated with the chosen Owner=${ZEUS_REGISTER_SECRET}
 			EOF
-		else
-			plog ERROR  "Service Director Registration Skipped! Fingerprint does not match"
 		fi
 	fi
 
