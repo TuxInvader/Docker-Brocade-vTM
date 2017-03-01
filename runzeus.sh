@@ -110,7 +110,7 @@ then
 			join=y
 		fi
 		if [ "$join" == "y" ]; then
-			plog INFO "Joining Cluster: $ZEUS_CLUSTER_NAME"
+			plog INFO "Configuring Cluster Join: $ZEUS_CLUSTER_NAME"
 			while [ -n "$(curl -k -s -S -o/dev/null https://$ZEUS_CLUSTER_NAME:9090)" ];
 			do
 				sleep 1
@@ -123,6 +123,7 @@ then
 				zlb!admin_username=admin
 				zxtm!clustertipjoin=p
 				zxtm!fingerprints_ok=Y
+				zxtm!join_new_cluster=Y
 			EOF
 		fi
 	fi
@@ -152,9 +153,11 @@ then
     fi
 
     plog INFO "Configuring vTM"
+    retries=1
 	until /usr/local/zeus/zxtm/configure --noninteractive --noloop --replay-from=/usr/local/zeus/zconfig.txt
 	do
-		sleep 1
+		plog INFO "Configuring vTM Failed, Retry: ${retries}"
+		sleep 10
 		# this might be due to a missing license.
 		# let's try to re-download if provided over HTTP.
 		if [[ "$ZEUS_LIC_URL" =~ http.* ]]
@@ -162,6 +165,20 @@ then
 			plog WARN "Retrying Download license key"
 			curl --silent $ZEUS_LIC_URL -o /tmp/fla.lic
 		fi
+		if [ $retries -eq 4 ]; then
+			if [ -n "$ZEUS_CLUSTER_NAME" ]; then
+				plog WARN "Final attempt, without Cluster Join"
+				sed -i 's/zxtm!join_new_cluster=Y/zxtm!join_new_cluster=N/' /usr/local/zeus/zconfig.txt
+			fi
+			if [ -n "$ZEUS_LIC" ]; then
+				plog WARN "Final attempt, without License Key"
+				sed -i 's/\/tmp\/fla.lic//' /usr/local/zeus/zconfig.txt
+			fi
+		elif [ $retries -gt 5 ]; then
+			plog FATAL "Failed to configure vTM. Quitting!"
+			exit 1
+		fi
+		retries=$(( $retries + 1 ))
 	done
 
 	touch /usr/local/zeus/docker.done
