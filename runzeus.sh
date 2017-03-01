@@ -173,7 +173,7 @@ then
 	do
 		sleep 10
 		plog INFO "Configuring vTM Failed, Retry: ${retries}"
-        if [ $retries -lt 4 ]; then
+		if [ $retries -lt 4 ]; then
 			# this might be due to a missing license.
 			# let's try to re-download if provided over HTTP.
 			if [[ "$ZEUS_LIC_URL" =~ http.* ]]
