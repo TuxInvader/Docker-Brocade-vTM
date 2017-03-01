@@ -162,17 +162,20 @@ then
 	do
 		sleep 10
 		plog INFO "Configuring vTM Failed, Retry: ${retries}"
-		# this might be due to a missing license.
-		# let's try to re-download if provided over HTTP.
-		if [[ "$ZEUS_LIC_URL" =~ http.* ]]
-		then
-			plog WARN "Retrying Download license key"
-			curl --silent $ZEUS_LIC_URL -o /tmp/fla.lic
-		fi
-		if [ $retries -eq 4 ]; then
+        if [ $retries -lt 4 ]; then
+			# this might be due to a missing license.
+			# let's try to re-download if provided over HTTP.
+			if [[ "$ZEUS_LIC_URL" =~ http.* ]]
+			then
+				plog WARN "Retrying Download license key"
+				curl --silent $ZEUS_LIC_URL -o /tmp/fla.lic
+			fi
+		elif [ $retries -eq 4 ]; then
+			plog WARN "Disabling license and clustering requests"
 			if [ -n "$ZEUS_CLUSTER_NAME" ]; then
 				plog WARN "Final attempt, without Cluster Join"
 				sed -i 's/zxtm!join_new_cluster=Y/zxtm!join_new_cluster=N/' /usr/local/zeus/zconfig.txt
+				sed -i 's/zxtm!cluster=S/zxtm!cluster=C/' /usr/local/zeus/zconfig.txt
 			fi
 			if [ -n "$ZEUS_LIC" ]; then
 				plog WARN "Final attempt, without License Key"
