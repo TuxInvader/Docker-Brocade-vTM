@@ -9,35 +9,35 @@ plog() {
 }
 
 genPasswd() {
-   if [ "$ZEUS_PASS" == "RANDOM" ] || [ "$ZEUS_PASS" == "SIMPLE" ] || [ "$ZEUS_PASS" == "STRONG" ]
-   then
+	if [ "$ZEUS_PASS" == "RANDOM" ] || [ "$ZEUS_PASS" == "SIMPLE" ] || [ "$ZEUS_PASS" == "STRONG" ]
+	then
 
 		# Default for RANDOM/SIMPLE is alphanumeric with , . - + _ 
 		chars=( a b c d e f g h i j k l m n o p q r s t u v w x y z 1 2 3 4 5 6 7 8 9 0 \
-			     A B C D E F G H I J K L M N O P Q R S T U V W X Y Z , \. \- \+ \_ )
+				 A B C D E F G H I J K L M N O P Q R S T U V W X Y Z , \. \- \+ \_ )
 
 		# Use Extra Strong Passwords (more symbols)
 		if [ "$ZEUS_PASS" == "STRONG" ]
 		then
-      	chars=( a b c d e f g h i j k l m n o p q r s t u v w x y z 1 2 3 4 5 6 7 8 9 0 \
-                 A B C D E F G H I J K L M N O P Q R S T U V W X Y Z , \. \< \> \~ \# \[ \] \
-                 \- \= \+ \_ \* \& \^ \% \$ \; \: \( \) )
+		chars=( a b c d e f g h i j k l m n o p q r s t u v w x y z 1 2 3 4 5 6 7 8 9 0 \
+				 A B C D E F G H I J K L M N O P Q R S T U V W X Y Z , \. \< \> \~ \# \[ \] \
+				 \- \= \+ \_ \* \& \^ \% \$ \; \: \( \) )
 		fi
 
-      length=$(( 9 + $(( $RANDOM % 3 )) ))
-      pass="";
+		length=$(( 9 + $(( $RANDOM % 3 )) ))
+		pass="";
 
-      for (( i=0; i<$length ; i++ ))
-      do
-         rnd=$(( $RANDOM % ${#chars[@]} ))
-         pass=${pass}${chars[${rnd}]}
-      done
-      ZEUS_PASS=$pass
-      plog INFO "Generated Random Password for vTM: $ZEUS_PASS"
-   else
-      plog INFO "Using Environment Password for vTM: $ZEUS_PASS"
-   fi
-   echo "$ZEUS_PASS"
+		for (( i=0; i<$length ; i++ ))
+		do
+			rnd=$(( $RANDOM % ${#chars[@]} ))
+			pass=${pass}${chars[${rnd}]}
+		done
+		ZEUS_PASS=$pass
+		plog INFO "Generated Random Password for vTM: $ZEUS_PASS"
+	else
+		plog INFO "Using Environment Password for vTM: $ZEUS_PASS"
+	fi
+	echo "$ZEUS_PASS"
 }
 
 plog INFO "Container Started"
@@ -61,11 +61,11 @@ fi
 if [ ! -f /usr/local/zeus/docker.done ] 
 then
 
-    plog INFO "Container First Run: STARTING"
+	plog INFO "Container First Run: STARTING"
 	# Install additional packages if ZEUS_PACKAGES is set. It should be set to a list of ubuntu packages
 	if [[ -n "$ZEUS_PACKAGES" ]]
 	then
-        plog INFO "Installing Packages: $ZEUS_PACKAGES"
+		plog INFO "Installing Packages: $ZEUS_PACKAGES"
 		apt-get update
 		for package in $ZEUS_PACKAGES
 		do
@@ -128,13 +128,13 @@ then
 		fi
 	fi
 
-    # Setup the configuration for self registration with SD
-    if [ -n "$ZEUS_REGISTER_HOST" ] && [ -n "$ZEUS_REGISTER_FP" ]; then
-        hostport=($( echo "${ZEUS_REGISTER_HOST}" | sed -re 's/:/ /' ))
-        $zhttp --fingerprint="${ZEUS_REGISTER_FP}"  --verify \
-               --no-verify-host "https://${ZEUS_REGISTER_HOST}" > /dev/null
-        if [ $? == 0 ]; then
-   	        plog INFO  "Service Director Registration OK! Cert Check Passed"
+	# Setup the configuration for self registration with SD
+	if [ -n "$ZEUS_REGISTER_HOST" ] && [ -n "$ZEUS_REGISTER_FP" ]; then
+		hostport=($( echo "${ZEUS_REGISTER_HOST}" | sed -re 's/:/ /' ))
+		$zhttp --fingerprint="${ZEUS_REGISTER_FP}"  --verify \
+			   --no-verify-host "https://${ZEUS_REGISTER_HOST}" > /dev/null
+		if [ $? == 0 ]; then
+			plog INFO  "Service Director Registration OK! Cert Check Passed"
 			cat <<-EOF >> /usr/local/zeus/zconfig.txt
 				selfreg!register=y
 				selfreg!address=${hostport[0]}
@@ -147,17 +147,17 @@ then
 				selfreg!owner_secret=${ZEUS_REGISTER_SECRET}
 				Zeus::ZInstall::Common::get_password:Enter the secret associated with the chosen Owner=${ZEUS_REGISTER_SECRET}
 			EOF
-        else
-   	        plog ERROR  "Service Director Registration Skipped! Fingerprint does not match"
-        fi
-    fi
+		else
+			plog ERROR  "Service Director Registration Skipped! Fingerprint does not match"
+		fi
+	fi
 
-    plog INFO "Configuring vTM"
-    retries=1
+	plog INFO "Configuring vTM"
+	retries=1
 	until /usr/local/zeus/zxtm/configure --noninteractive --noloop --replay-from=/usr/local/zeus/zconfig.txt
 	do
-		plog INFO "Configuring vTM Failed, Retry: ${retries}"
 		sleep 10
+		plog INFO "Configuring vTM Failed, Retry: ${retries}"
 		# this might be due to a missing license.
 		# let's try to re-download if provided over HTTP.
 		if [[ "$ZEUS_LIC_URL" =~ http.* ]]
@@ -202,7 +202,7 @@ then
 		echo -e "developer_mode_accepted\tyes" >> /usr/local/zeus/zxtm/global.cfg
 	fi
 
-    plog INFO "Container First Run COMPLETE"
+	plog INFO "Container First Run COMPLETE"
 
 else
 	# Start Zeus
