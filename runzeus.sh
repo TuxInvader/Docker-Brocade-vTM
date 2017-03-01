@@ -5,7 +5,11 @@ zhttp="/usr/local/zeus/admin/bin/httpclient"
 provisionLog="/var/log/provision.log"
 
 plog() {
-   echo "$1: $2" >> $provisionLog
+	if [ -n "$3" ]; then
+		echo "$1: $2" >> $provisionLog
+	else
+		echo "$1: $2" | tee -a $provisionLog
+	fi
 }
 
 genPasswd() {
@@ -33,9 +37,9 @@ genPasswd() {
 			pass=${pass}${chars[${rnd}]}
 		done
 		ZEUS_PASS=$pass
-		plog INFO "Generated Random Password for vTM: $ZEUS_PASS"
+		plog INFO "Generated Random Password for vTM: $ZEUS_PASS" quiet
 	else
-		plog INFO "Using Environment Password for vTM: $ZEUS_PASS"
+		plog INFO "Using Environment Password for vTM: $ZEUS_PASS" quiet
 	fi
 	echo "$ZEUS_PASS"
 }
@@ -192,9 +196,9 @@ then
 	echo "GlobalSettings.setRESTEnabled 1" | $zcli
 
 	# Disable Java Extensions if we don't have the java binary
-	echo -en "Checking for JAVA Extension Support: "
-	which $(echo "GlobalSettings.getJavaCommand" | $zcli | awk '{ print $1 }' ) || \
-			( echo "java not found" && echo "GlobalSettings.setJavaEnabled 0" | $zcli )
+	java=$(which $(echo "GlobalSettings.getJavaCommand" | $zcli | awk '{ print $1 }' ) || \
+			( echo "java not found" && echo "GlobalSettings.setJavaEnabled 0" | $zcli ) )
+	plog INFO "Checking for JAVA Extension Support: $java"
 
 	if [ -n "$ZEUS_DEVMODE" ]
 	then
@@ -206,15 +210,16 @@ then
 
 else
 	# Start Zeus
+	plog INFO "Starting Zeus"
 	/usr/local/zeus/start-zeus 
 fi
 
 
 # Print the password and wait for SIGTERM
-trap "echo 'Caught SIGTERM'" SIGTERM
+trap "plog INFO 'Caught SIGTERM'" SIGTERM
 grep -i password /var/log/provision.log
 tail -f /dev/null &
 wait $!
 /usr/local/zeus/stop-zeus
-echo "Container Stopped"
+plog INFO "Container Stopped"
 
