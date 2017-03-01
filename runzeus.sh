@@ -98,20 +98,33 @@ then
 	EOF
 
 	if [ -n "$ZEUS_CLUSTER_NAME" ]; then
-		plog INFO "Joining Cluster: $ZEUS_CLUSTER_NAME"
-		while [ -n "$(curl -k -s -S -o/dev/null https://$ZEUS_CLUSTER_NAME:9090)" ];
-		do
-			sleep 1
-		done
-		sed -i 's/zxtm!cluster=C/zxtm!cluster=S/' /usr/local/zeus/zconfig.txt
-		cat <<-EOF >> /usr/local/zeus/zconfig.txt
-			zlb!admin_hostname=$ZEUS_CLUSTER_NAME
-			zlb!admin_password=$ZEUS_PASS
-			zlb!admin_port=9090
-			zlb!admin_username=admin
-			zxtm!clustertipjoin=p
-			zxtm!fingerprints_ok=Y
-		EOF
+		join=n
+		if [ -n "$ZEUS_CLUSTER_FP" ]; then
+			plog INFO "Checking Cluster Fingerprint: $ZEUS_CLUSTER_FP"
+			$zhttp --fingerprint="${ZEUS_CLUSTER_FP}"  --verify \
+				--no-verify-host "https://${ZEUS_CLUSTER_NAME}:9090" > /dev/null
+			if [ $? == 0 ]; then
+				join=y
+			fi
+		else
+			join=y
+		fi
+		if [ "$join" == "y" ]; then
+			plog INFO "Joining Cluster: $ZEUS_CLUSTER_NAME"
+			while [ -n "$(curl -k -s -S -o/dev/null https://$ZEUS_CLUSTER_NAME:9090)" ];
+			do
+				sleep 1
+			done
+			sed -i 's/zxtm!cluster=C/zxtm!cluster=S/' /usr/local/zeus/zconfig.txt
+			cat <<-EOF >> /usr/local/zeus/zconfig.txt
+				zlb!admin_hostname=$ZEUS_CLUSTER_NAME
+				zlb!admin_password=$ZEUS_PASS
+				zlb!admin_port=9090
+				zlb!admin_username=admin
+				zxtm!clustertipjoin=p
+				zxtm!fingerprints_ok=Y
+			EOF
+		fi
 	fi
 
     # Setup the configuration for self registration with SD

@@ -48,6 +48,10 @@ You may pass ZEUS_DEVMODE=yes in order to avoid seeing that warning.
 
 If you want this vtm to join an existing cluster, simply provide the DNS name of one of the cluster member through this environment variable.
 
+*ZEUS_CLUSTER_FP*
+
+If you want this vTM to verify the SHA-1 fingerprint of the cluster host it is joining with, then provide the 20 byte hex encoded, colon separated hash here. eg: aa:bb:cc:dd:ee:ff:11:22:33:44:55:66:77:88:99:00:aa:bb:cc:dd
+
 #
 
 Usage with Brocade Service Director (Formerly SSC)
