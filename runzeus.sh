@@ -199,6 +199,9 @@ then
 		retries=$(( $retries + 1 ))
 	done
 
+	# Copy in the Docker AutoSclaing driver
+	cp -p /usr/local/zeus/dockerScaler.py /usr/local/zeus/zxtm/conf/extra/
+
 	touch /usr/local/zeus/docker.done
 	rm /usr/local/zeus/zconfig.txt
 
