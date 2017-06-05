@@ -1,9 +1,9 @@
-FROM ubuntu-debootstrap:14.04.2
+FROM ubuntu:16.04
 COPY zinstall.txt /tmp/
 ENV ZEUSFILE=ZeusTM_172_Linux-x86_64.tgz
 COPY installer/ /tmp/
 RUN cd /tmp/ \
-&&  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y dnsutils curl iproute2 iptables libxtables10 python python-requests \
+&&  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y dnsutils curl iproute2 iptables libxtables11 python python-requests \
 &&  if [ ! -f /tmp/$ZEUSFILE ]; then \
     echo "Downloading VTM Installer... Please wait..." ; \
     curl -sSL http://www.badpenguin.co.uk/vadc/$ZEUSFILE > $ZEUSFILE ; \
