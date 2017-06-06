@@ -85,7 +85,7 @@ The name of the Owner for this vTM
 
 *ZEUS_REGISTER_SECRET*
 
-If the Owner has a secret, then you need to provide that secret here.
+The Owner secret.
 
 Example:
 
