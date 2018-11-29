@@ -64,6 +64,9 @@ fi
 if [ ! -f /usr/local/zeus/.docker.done ]
 then
 
+    # Do we need to check for Java Extension support?
+    zeus_check_java="yes"
+
     plog INFO "Container first run: STARTING"
     # Install additional packages if ZEUS_PACKAGES is set. It should be set to a list of ubuntu packages
     if [[ -n "$ZEUS_PACKAGES" ]]
@@ -116,6 +119,8 @@ EOF
             ZEUS_CLUSTER_PORT=9090
         fi
         join=n
+        # Disable Java Check, we're joining a cluster
+        zeus_check_java="no"
         if [ -n "$ZEUS_CLUSTER_FP" ]; then
             plog INFO "Checking cluster fingerprint: $ZEUS_CLUSTER_FP"
             $zhttp --fingerprint="${ZEUS_CLUSTER_FP}"  --verify \
@@ -227,6 +232,10 @@ EOF
 
     if [ -n "$ZEUS_BASE_CONFIG" ]
     then
+
+        # Disable Java Check, a base config was provided
+        zeus_check_java="no"
+
         if [ ! -x "$configimport" ]
         then
             plog ERROR "Configuration importer not available, unset ZEUS_BASE_CONFIG"
@@ -260,6 +269,10 @@ EOF
 
     if [ -n "$ZEUS_WATCHED_CONFIG" ]
     then
+
+        # Disable Java Check, a watched config was provided
+        zeus_check_java="no"
+
         if [ ! -x "$watchdirectory" ]
         then
             plog ERROR "Configuration watcher not available, unset ZEUS_WATCHED_CONFIG"
@@ -273,14 +286,36 @@ EOF
         fi
     fi
 
+    # Copy in the Docker AutoSclaing driver
+	cp -p /usr/local/zeus/dockerScaler.py /usr/local/zeus/zxtm/conf/extra/
+
     touch /usr/local/zeus/.docker.done
     rm /usr/local/zeus/zconfig.txt
     plog INFO "Container first run COMPLETE"
+    # Start Zeus
+    plog INFO "Starting traffic manager"
+    /usr/local/zeus/start-zeus
+
+    # If no configuration was supplied (base-config or watcher), and we didn't join a cluster, check for java support.
+    if [ "$zeus_check_java" == "yes" ]
+    then
+        java=$(which $(echo "GlobalSettings.getJavaCommand" | $zcli | awk '{ print $1 }' ))
+        if [ -z "$java" ] 
+        then
+            echo "GlobalSettings.setJavaEnabled 0" | $zcli
+            echo "Java not found, disabling Java Extensions"
+        else 
+            echo "GlobalSettings.setJavaEnabled 1" | $zcli
+            echo "Java found, enabling Java Extensions"
+        fi
+    fi
+
+else
+    # Start Zeus
+    plog INFO "Starting traffic manager"
+    /usr/local/zeus/start-zeus
 fi
 
-# Start Zeus
-plog INFO "Starting traffic manager"
-/usr/local/zeus/start-zeus
 
 # Start config watcher
 if [ -n "$ZEUS_WATCHED_CONFIG" ]
