@@ -297,19 +297,20 @@ EOF
     # add our custom config settings: check java support, and add autoscaler.
     if [ "$zeus_init_config" == "yes" ]
     then
-
+        plog INFO "Customising the vTM initial configuration."
         # Check for java support
         java=$(which $(echo "GlobalSettings.getJavaCommand" | $zcli | awk '{ print $1 }' ))
         if [ -z "$java" ] 
         then
             echo "GlobalSettings.setJavaEnabled 0" | $zcli
-            echo "Java not found, disabling Java Extensions"
+            plog INFO "Java not found, disabling Java Extensions"
         else 
             echo "GlobalSettings.setJavaEnabled 1" | $zcli
-            echo "Java found, enabling Java Extensions"
+            plog INFO "Java found, enabling Java Extensions"
         fi
 
         # Copy in the Docker AutoSclaing driver
+        plog INFO "Copying in AutoScaler driver"
         cp -p /usr/local/zeus/dockerScaler.py /usr/local/zeus/zxtm/conf/extra/
     fi
 
