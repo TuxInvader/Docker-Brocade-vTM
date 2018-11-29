@@ -64,8 +64,8 @@ fi
 if [ ! -f /usr/local/zeus/.docker.done ]
 then
 
-    # Do we need to check for Java Extension support?
-    zeus_check_java="yes"
+    # Do we need to customise the config (java check, install autoscaler...)
+    zeus_init_config="yes"
 
     plog INFO "Container first run: STARTING"
     # Install additional packages if ZEUS_PACKAGES is set. It should be set to a list of ubuntu packages
@@ -119,8 +119,6 @@ EOF
             ZEUS_CLUSTER_PORT=9090
         fi
         join=n
-        # Disable Java Check, we're joining a cluster
-        zeus_check_java="no"
         if [ -n "$ZEUS_CLUSTER_FP" ]; then
             plog INFO "Checking cluster fingerprint: $ZEUS_CLUSTER_FP"
             $zhttp --fingerprint="${ZEUS_CLUSTER_FP}"  --verify \
@@ -134,6 +132,8 @@ EOF
             join=y
         fi
         if [ "$join" == "y" ]; then
+            # We're joining a cluster, don't make any configuration changes later
+            zeus_init_config="no"
             plog INFO "Configuring cluster join: $ZEUS_CLUSTER_NAME:$ZEUS_CLUSTER_PORT"
             while [ -n "$($zhttp --no-verify-host https://$ZEUS_CLUSTER_NAME:$ZEUS_CLUSTER_PORT > /dev/null)" ];
             do
@@ -233,8 +233,8 @@ EOF
     if [ -n "$ZEUS_BASE_CONFIG" ]
     then
 
-        # Disable Java Check, a base config was provided
-        zeus_check_java="no"
+        # We have a base config, don't make any changes ourselves.
+        zeus_init_config="no"
 
         if [ ! -x "$configimport" ]
         then
@@ -270,8 +270,8 @@ EOF
     if [ -n "$ZEUS_WATCHED_CONFIG" ]
     then
 
-        # Disable Java Check, a watched config was provided
-        zeus_check_java="no"
+        # We have a watched config, don't make any changes ourselves.
+        zeus_init_config="no"
 
         if [ ! -x "$watchdirectory" ]
         then
@@ -286,9 +286,6 @@ EOF
         fi
     fi
 
-    # Copy in the Docker AutoSclaing driver
-    cp -p /usr/local/zeus/dockerScaler.py /usr/local/zeus/zxtm/conf/extra/
-
     touch /usr/local/zeus/.docker.done
     rm /usr/local/zeus/zconfig.txt
     plog INFO "Container first run COMPLETE"
@@ -296,9 +293,12 @@ EOF
     plog INFO "Starting traffic manager"
     /usr/local/zeus/start-zeus
 
-    # If no configuration was supplied (base-config or watcher), and we didn't join a cluster, check for java support.
-    if [ "$zeus_check_java" == "yes" ]
+    # If no configuration was supplied (base-config or watcher), and we didn't join a cluster,
+    # add our custom config settings: check java support, and add autoscaler.
+    if [ "$zeus_init_config" == "yes" ]
     then
+
+        # Check for java support
         java=$(which $(echo "GlobalSettings.getJavaCommand" | $zcli | awk '{ print $1 }' ))
         if [ -z "$java" ] 
         then
@@ -308,6 +308,9 @@ EOF
             echo "GlobalSettings.setJavaEnabled 1" | $zcli
             echo "Java found, enabling Java Extensions"
         fi
+
+        # Copy in the Docker AutoSclaing driver
+        cp -p /usr/local/zeus/dockerScaler.py /usr/local/zeus/zxtm/conf/extra/
     fi
 
 else
