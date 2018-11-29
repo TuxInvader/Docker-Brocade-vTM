@@ -287,7 +287,7 @@ EOF
     fi
 
     # Copy in the Docker AutoSclaing driver
-	cp -p /usr/local/zeus/dockerScaler.py /usr/local/zeus/zxtm/conf/extra/
+    cp -p /usr/local/zeus/dockerScaler.py /usr/local/zeus/zxtm/conf/extra/
 
     touch /usr/local/zeus/.docker.done
     rm /usr/local/zeus/zconfig.txt
