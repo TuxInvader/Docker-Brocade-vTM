@@ -1,6 +1,9 @@
-# Pulse Secure VTM (Docker-Brocade-vTM)
+# Pulse Secure VTM 
 
-Pulse Secure vTM - Load Balancer. Extended from pulsesecure/vtm.
+This is a great little load balancer, which runs in Community Edition by default. Good integration with Kubernetes, and other container platforms. Fully customisable. It can be fully licensed and supported by contacting Pulse Secure and asking about a Services Director.
+
+For Kubernetes integration, see: https://github.com/pulse-vadc/kubernetes-vtm/
+
 
 Pulse Secure vTM (Formerly Brocade, Zeus ZXTM )
 ==================================================
