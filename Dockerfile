@@ -1,18 +1,8 @@
-FROM ubuntu:16.04
-COPY zinstall.txt /tmp/
-ENV ZEUSFILE=ZeusTM_172_Linux-x86_64.tgz
-COPY installer/ /tmp/
-RUN cd /tmp/ \
-&&  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y dnsutils curl iproute2 iptables libxtables11 python python-requests \
-&&  if [ ! -f /tmp/$ZEUSFILE ]; then \
-    echo "Downloading VTM Installer... Please wait..." ; \
-    curl -sSL http://www.badpenguin.co.uk/vadc/$ZEUSFILE > $ZEUSFILE ; \
-    fi \
-&&  tar -zxvf $ZEUSFILE \
-&&  /tmp/Zeus*/zinstall --replay-from=/tmp/zinstall.txt --noninteractive \
-&&  rm -rf /tmp/* \
-&&  apt-get clean
-COPY dockerScaler.py zconfig.txt runzeus.sh /usr/local/zeus/
+FROM pulsesecure/vtm:18.3
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y dnsutils curl iproute2 iptables libxtables11 python python-requests \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+COPY dockerScaler.py runzeus.sh /usr/local/zeus/
 # ZEUS_EULA must be set to "accept" otherwise the container will do nothing
 ENV ZEUS_EULA=
 # ZEUS_LIC can be used to pass a URL from which the container will download a license file
@@ -26,8 +16,8 @@ ENV ZEUS_DOM=
 # ZEUS_PACKAGES can be used to install additional packages on first run. 
 # If you need Java Extensions.... Eg ZEUS_PACKAGES="openjdk-7-jre-headless"
 ENV ZEUS_PACKAGES=
-# ZEUS_DEVMODE can be used to force the vtm to start up in limited development mode
-ENV ZEUS_DEVMODE=
+# ZEUS_COMMUNITY_EDITION can be used accept the Community Edition license, and avoid being asked on login
+ENV ZEUS_COMMUNITY_EDITION=
 # ZEUS_CLUSTER_NAME is used to set the DNS name of an existing member of an existing cluster
 # we wish to get this new vtm integrated into.
 ENV ZEUS_CLUSTER_NAME=
