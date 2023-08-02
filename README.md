@@ -28,9 +28,10 @@ You can also set ZEUS_PASS=STRONG if you want to generate a stronger password ma
 
 Extended from official image
 ---------------------------
-This container now inherits from the official pulsesecure/vtm container at <https://hub.docker.com/r/pulsesecure/vtm/>
+This container is very similar to the official pulsesecure/vtm container at <https://hub.docker.com/r/pulsesecure/vtm/>
 The differences are tiny:
 
+  * Updated Ubuntu to 22.04
   * includes python-requests library, curl, and a few other tools
   * Adds a Docker autoscaler (needs python-requests)
   * Checks if java is installed, and disables Java Extensions if it isn't

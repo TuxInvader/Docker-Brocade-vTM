@@ -1,8 +1,18 @@
-FROM pulsesecure/vtm:18.3
-RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y dnsutils curl iproute2 iptables libxtables11 python python-requests \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-COPY dockerScaler.py runzeus.sh /usr/local/zeus/
+FROM ubuntu:22.04
+COPY zinstall.txt /tmp/
+ENV ZEUSFILE=ZeusTM_213_Linux-x86_64.tgz
+COPY installer/ /tmp/
+RUN cd /tmp/ \
+&&  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y dnsutils curl iproute2 iptables libxtables12 python3-requests \
+&&  if [ ! -f /tmp/$ZEUSFILE ]; then \
+    echo "Downloading VTM Installer... Please wait..." ; \
+    curl -sSL http://www.badpenguin.co.uk/vadc/$ZEUSFILE > $ZEUSFILE ; \
+    fi \
+&&  tar -zxvf $ZEUSFILE \
+&&  /tmp/Zeus*/zinstall --replay-from=/tmp/zinstall.txt --noninteractive \
+&&  rm -rf /tmp/* \
+&&  apt-get clean
+COPY dockerScaler.py zconfig.txt runzeus.sh /usr/local/zeus/
 # ZEUS_EULA must be set to "accept" otherwise the container will do nothing
 ENV ZEUS_EULA=
 # ZEUS_LIC can be used to pass a URL from which the container will download a license file
